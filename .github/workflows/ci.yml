@@ -1,0 +1,65 @@
+name: CI
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  test:
+    # Windows 是三端主力用户的系统，所以它是 CI 的**一等公民**，不是可选项。
+    # 中文 Windows 控制台默认 GBK，打印 ✅ 会抛 UnicodeEncodeError 把脚本崩掉；
+    # 那个 bug 就是靠人手动 `PYTHONIOENCODING=gbk` 才发现的，现在让机器每次都试。
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        python: ["3.9", "3.13"]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+
+      # 零第三方依赖是本项目的硬约束，所以这里**不装任何东西**。
+      # 哪天有人偷偷 import 了个包，这一步会因为装不上而失败——正是我们要的。
+      - name: 全部单元测试
+        run: python tests/run_all.py
+
+      - name: vendor 副本与 _shared/ 同步
+        run: python build.py --check
+
+      - name: 发布产物可构建、校验和可核对
+        run: python build.py --dist dist
+
+  gbk-console:
+    # 单独一个 job 复现中文 Windows 控制台。上面的矩阵跑的是默认 UTF-8 的
+    # GitHub runner，抓不到 GBK 那一类崩溃。
+    runs-on: windows-latest
+    env:
+      PYTHONIOENCODING: gbk
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: GBK 控制台下跑编码与路径测试
+        run: python tests/run_all.py -k windows
+      - name: GBK 控制台下跑连接诊断（不出网）
+        run: python skills/hello-jdy/scripts/probe.py --no-network
+      - name: GBK 控制台下列出各端目录
+        run: python install.py --list
+
+  no-secrets:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: 脱敏闸门
+        run: python tests/test_no_secrets.py

@@ -1,0 +1,4 @@
+JDY-PROBE-MARKER-OK
+这个文件只有一个用途：让 probe.py 的 C2 检查确认「技能能否读到自己包内的 references/ 文件」。
+各平台沙箱对技能包内相对路径的处理不一致，读不到就说明知识库层（references/）在该端不可用，
+必须把内容内联进 SKILL.md 正文——这是 Sprint 0 要提前发现的坑。

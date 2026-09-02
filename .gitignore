@@ -1,0 +1,26 @@
+# 密钥——一行都不许进仓库
+.jdy/
+config.json
+*.key
+.env
+
+# 探针报告可能含应用名/ID
+jdy-probe-*.json
+*-probe-report.json
+
+# 内部项目管理文档，不公开（本地保留）
+docs/sprint0-checklist.md
+
+dist/
+
+.venv/
+__pycache__/
+*.py[cod]
+.DS_Store
+.pytest_cache/
+jdy-state/
+
+# 本地权限设置，不进仓库
+.claude/settings.local.json
+
+# 本地权限设置，不进仓库
