@@ -19,6 +19,12 @@ description: |
   另外这些说法也走本技能：梳理应用结构、简道云体检、字段说明。
 version: 0.7.0
 license: Apache-2.0
+display_name: "简道云数据字典与结构体检"
+display_name_en: "JDY Data Dictionary & Structure Audit"
+description_zh: "把简道云应用导成一份可交付的数据字典文件，并体检出导入与集成会踩的坑。只读。"
+description_en: "Exports a JianDaoYun app into a deliverable Markdown data dictionary and audits the structure for import and integration pitfalls. Read-only."
+category: data
+author: aicliagent
 ---
 
 # jdy-doc 数据字典与结构体检

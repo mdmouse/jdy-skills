@@ -1,0 +1,63 @@
+{
+  "name": "jdy-ops-expert",
+  "version": "0.7.0",
+  "description": "Third-party operations assistant for JianDaoYun: query and report on form data, move data in and out of Excel, clear approval backlogs, and clean up messy records — every write is previewed as a dry-run plan first.",
+  "author": {
+    "name": "aicliagent",
+    "email": "hi@aicliagent.com"
+  },
+  "homepage": "https://aicliagent.com",
+  "license": "Apache-2.0",
+  "keywords": [
+    "jiandaoyun",
+    "low-code",
+    "operations",
+    "excel",
+    "approval"
+  ],
+  "agents": ["./agents/jdy-ops-advisor.md"],
+  "skills": [
+    "./skills/hello-jdy",
+    "./skills/jdy-doc",
+    "./skills/jdy-query",
+    "./skills/jdy-excel-bridge",
+    "./skills/jdy-report",
+    "./skills/jdy-flow-ops",
+    "./skills/jdy-clean",
+    "./skills/jdy-watch",
+    "./skills/jdy-org"
+  ],
+
+  "expertType": "agent",
+  "agentName": "jdy-ops-advisor",
+
+  "displayName": {
+    "en": "JDY Ops Assistant (3rd-party)",
+    "zh": "简道云运营助手（第三方）"
+  },
+  "profession": {
+    "en": "JianDaoYun Form Operations & Workflow Steward",
+    "zh": "简道云表单运营与流程管家"
+  },
+  "displayDescription": {
+    "en": "For ops and admin staff who live in JianDaoYun: query and chart data, import and export Excel, chase approvals, clean up messy records. Writes are always planned before they run.",
+    "zh": "面向运营与行政：查数出报表、批量导入导出、催审批、清洗脏数据，写入一律先出计划再执行。"
+  },
+  "avatar": "avatars/expert.png",
+  "categoryId": "09-OperationsHR",
+  "defaultInitPrompt": {
+    "zh": "列出我简道云里的应用和表单",
+    "en": "List the apps and forms in my JianDaoYun account"
+  },
+  "plugin": "jdy-ops-expert",
+  "tags": [
+    { "en": "Form Data Ops", "zh": "表单数据运营" },
+    { "en": "Approval Workflow", "zh": "审批流程" },
+    { "en": "Excel Import/Export", "zh": "Excel 导入导出" }
+  ],
+  "quickPrompts": [
+    { "en": "List the apps and forms in my JianDaoYun account", "zh": "列出我简道云里的应用和表单" },
+    { "en": "Export one of my forms to an Excel file", "zh": "把某张表导成 Excel 给我" },
+    { "en": "Show me the approvals that are waiting on me", "zh": "看看我有哪些待审批的待办" }
+  ]
+}

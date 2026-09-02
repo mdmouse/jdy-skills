@@ -17,6 +17,12 @@ description: |
   定时巡检、监控某某表、到了阈值提醒我。
 version: 0.7.0
 license: Apache-2.0
+display_name: "简道云数据哨兵"
+display_name_en: "JDY Data Sentinel"
+description_zh: "按规则定时巡检简道云表单，阈值命中或有新记录就推到群里，自带去重与冷却。只读。"
+description_en: "Polls JianDaoYun forms on a schedule and pushes threshold hits or newly seen records to a group bot, with built-in deduplication and cooldown. Read-only."
+category: automation
+author: aicliagent
 ---
 
 # jdy-watch 数据哨兵

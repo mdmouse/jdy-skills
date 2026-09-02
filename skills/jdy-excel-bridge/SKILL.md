@@ -17,6 +17,12 @@ description: |
   导出附件、把附件传上去、批量上传附件。
 version: 0.7.0
 license: Apache-2.0
+display_name: "简道云 Excel 导入导出"
+display_name_en: "JDY Excel Import & Export"
+description_zh: "Excel 与简道云双向搬数据：预检、分批幂等写入、写后回读比对、修复建议表，附件也能进出。"
+description_en: "Moves data both ways between Excel and JianDaoYun: cell-level preflight, idempotent batched writes, read-back verification, a fix-list sheet, and attachment transfer."
+category: data
+author: aicliagent
 ---
 
 # jdy-excel-bridge Excel ⇄ 简道云

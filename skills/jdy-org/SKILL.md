@@ -16,6 +16,12 @@ description: |
   成员编号、导出通讯录、建部门、调整部门、把某人调到某部门、加成员。
 version: 0.7.0
 license: Apache-2.0
+display_name: "简道云通讯录管家"
+display_name_en: "JDY Directory Steward"
+description_zh: "导出部门树与姓名↔成员编号对照表；建部门、调归属、加成员。不接任何删除接口。"
+description_en: "Exports the department tree and the authoritative name-to-member-number mapping; creates departments, moves members and adds members. Wires up no delete endpoint at all."
+category: office
+author: aicliagent
 ---
 
 # jdy-org 通讯录管家

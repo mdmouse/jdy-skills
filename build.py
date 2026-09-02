@@ -191,7 +191,19 @@ def skill_version(name):
     return m.group(1) if m else "0.0.0"
 
 
-def dist(out_dir):
+# 两个渠道要的 zip 顶层目录不一样，所以同一批技能要打两种布局：
+#   github     `<name>.zip`            包内 `<name>/SKILL.md`
+#              —— GitHub Release、千问办公「导入本地技能文件」
+#   workbuddy  `<name>-workbuddy.zip`  包内 `skills/<name>/SKILL.md`
+#              —— 腾讯 WorkBuddy 开放平台「技能」渠道，最外层多一级 skills/
+# 传错布局的后果是**上传时才报错**，本地怎么看都是对的，所以两种都打、都写进校验和。
+LAYOUTS = {
+    "github": {"arc_prefix": "", "name_suffix": ""},
+    "workbuddy": {"arc_prefix": "skills", "name_suffix": "-workbuddy"},
+}
+
+
+def dist(out_dir, layout="github"):
     """vendor → 打 zip → 写校验和。**发布只走这一条路。**
 
     手工 `install.py --zip` 打出来的包没有校验和、也不保证 vendor 是新的——
@@ -205,18 +217,27 @@ def dist(out_dir):
     sys.path.insert(0, ROOT)
     import install                       # 打包逻辑只此一份，不再抄一遍
     names = install.skill_names()
-    print("打包 %d 个技能到 %s/" % (len(names), out_dir))
-    install.make_zip(names, out_dir)
+    wanted = list(LAYOUTS) if layout == "both" else [layout]
+    print("打包 %d 个技能到 %s/（布局：%s）"
+          % (len(names), out_dir, "、".join(wanted)))
+    stems = []                       # 产出的 zip（不含 .zip），按这个写校验和
+    for one in wanted:
+        opt = LAYOUTS[one]
+        install.make_zip(names, out_dir, **opt)
+        stems += [(name, name + opt["name_suffix"]) for name in names]
 
     # SHA256SUMS 必须是**严格两列**的标准格式，否则 `shasum -c` 读不了。
     # 版本号想搭个便车写在第三列——那样文件是好看了，核对命令直接报
     # "No such file or directory"。版本另写 MANIFEST.txt。
+    #
+    # **两种布局都要进这两个文件**：只给其中一种写校验和，另一种就成了
+    # 没人核得了的产物——而它恰恰是要传给审核方的那一个。
     sums, manifest = [], []
-    for name in sorted(names):
-        zp = os.path.join(out_dir, "%s.zip" % name)
+    for name, stem in sorted(stems, key=lambda t: t[1]):
+        zp = os.path.join(out_dir, "%s.zip" % stem)
         digest = hashlib.sha256(open(zp, "rb").read()).hexdigest()
-        sums.append("%s  %s.zip" % (digest, name))
-        manifest.append("%-20s v%-8s %s" % (name, skill_version(name), digest[:16]))
+        sums.append("%s  %s.zip" % (digest, stem))
+        manifest.append("%-24s v%-8s %s" % (stem, skill_version(name), digest[:16]))
     # newline="\n" 不能省：文本模式默认走 os.linesep，**Windows 上写出来是 CRLF**。
     # `shasum -a 256 -c SHA256SUMS` 读到的文件名就带着一个尾随的 \r，
     # 于是报 `sha256sum: 'hello-jdy.zip'$'\r': No such file or directory`——
@@ -240,9 +261,15 @@ def main():
                     help="只校验 vendor 副本是否与 _shared/ 同步，不修改文件")
     ap.add_argument("--dist", metavar="DIR",
                     help="发布：vendor + 打 zip + 写 SHA256SUMS 到该目录")
+    ap.add_argument("--layout", choices=sorted(LAYOUTS) + ["both"],
+                    default="github",
+                    help="zip 内的顶层目录布局（配合 --dist）："
+                         "github=<name>/（默认，GitHub Release 与千问办公）、"
+                         "workbuddy=skills/<name>/（WorkBuddy 开放平台技能渠道）、"
+                         "both=两种都打")
     args = ap.parse_args()
     if args.dist:
-        return dist(args.dist)
+        return dist(args.dist, args.layout)
     return vendor(check=args.check)
 
 

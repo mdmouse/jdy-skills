@@ -15,6 +15,12 @@ description: |
   这周的数据怎么样、按周拆分、按月趋势、环比、同比、算个比率、定时报表。
 version: 0.7.0
 license: Apache-2.0
+display_name: "简道云周报月报"
+display_name_en: "JDY Periodic Reports"
+description_zh: "按周期拉数、聚合、环比、趋势与 Top 榜，渲染成 Markdown，可推送企业微信／飞书／钉钉群。只读。"
+description_en: "Pulls data per period and renders Markdown reports with aggregates, period-over-period deltas, trends and Top-N rankings; can push to WeCom, Feishu or DingTalk group bots. Read-only."
+category: office
+author: aicliagent
 ---
 
 # jdy-report 周报／月报

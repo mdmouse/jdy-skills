@@ -317,14 +317,25 @@ def discover():
     return hits
 
 
-def make_zip(names, out_dir):
-    """每个技能打一个 zip，压缩包内以技能名为顶层目录——
-    千问办公的「导入本地技能文件」需要这种形态。"""
+def make_zip(names, out_dir, arc_prefix="", name_suffix=""):
+    """每个技能打一个 zip。
+
+    默认（两个参数都空）：`<name>.zip`，压缩包内以技能名为顶层目录——
+    千问办公的「导入本地技能文件」和 GitHub Release 需要这种形态。
+
+    **两种布局，因为两个渠道要的顶层目录不一样**：腾讯 WorkBuddy 开放平台的
+    「技能」渠道要 `skills/<name>/SKILL.md`，最外层多一级 `skills/`。
+    同一个包换个顶层目录名就得重打一次，所以这里参数化而不是复制一份函数：
+      * `arc_prefix="skills"` → 包内路径变成 `skills/<name>/...`
+      * `name_suffix="-workbuddy"` → 文件名变成 `<name>-workbuddy.zip`
+    两个都留空时行为与改动前**逐字节一致**。
+    """
     os.makedirs(out_dir, exist_ok=True)
     made = []
     for name in names:
         src = os.path.join(SKILLS_DIR, name)
-        out = os.path.join(out_dir, "%s.zip" % name)
+        out = os.path.join(out_dir, "%s%s.zip" % (name, name_suffix))
+        top = os.path.join(arc_prefix, name) if arc_prefix else name
         with zipfile.ZipFile(out, "w", zipfile.ZIP_DEFLATED) as zf:
             for dirpath, dirnames, files in os.walk(src):
                 dirnames[:] = [d for d in dirnames if d != "__pycache__"]
@@ -332,7 +343,7 @@ def make_zip(names, out_dir):
                     if f.endswith(".pyc"):
                         continue
                     full = os.path.join(dirpath, f)
-                    arc = os.path.join(name, os.path.relpath(full, src))
+                    arc = os.path.join(top, os.path.relpath(full, src))
                     zf.write(full, arc)
         made.append((out, os.path.getsize(out)))
         print("  %s（%.1f KB）" % (out, os.path.getsize(out) / 1024.0))

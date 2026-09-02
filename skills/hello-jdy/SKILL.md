@@ -13,6 +13,12 @@ description: |
   这个端是双轨还是单轨、装没装官方 AI 连接、有没有装简道云连接器、平台兼容性验证。
 version: 0.7.0
 license: Apache-2.0
+display_name: "简道云连接诊断"
+display_name_en: "JDY Connection Doctor"
+description_zh: "装了简道云技能却用不了时，一条命令告诉你断在哪一环，并引导配置 API Key。只读。"
+description_en: "When the JianDaoYun skills are installed but not working, one command tells you which link in the chain is broken and walks you through configuring the API key. Read-only."
+category: development
+author: aicliagent
 ---
 
 # 简道云连接诊断

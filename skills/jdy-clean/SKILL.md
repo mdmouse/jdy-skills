@@ -19,6 +19,12 @@ description: |
   有重复数据、查重、批量规范化、贴标签、批量分类、给数据分类、自动归类。
 version: 0.7.0
 license: Apache-2.0
+display_name: "简道云数据清洗"
+display_name_en: "JDY Data Cleaning"
+description_zh: "扫填充率与格式不统一、查重只打标不删除、规范化只做不改语义的处理，写前备份、写后回读。"
+description_en: "Profiles fill rates and format inconsistencies, flags duplicates without ever deleting, normalizes values without changing meaning, backs up before writing and verifies by reading back."
+category: data
+author: aicliagent
 ---
 
 # jdy-clean 存量数据清洗

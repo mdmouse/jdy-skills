@@ -1,0 +1,58 @@
+{
+  "name": "jdy-dev-expert",
+  "version": "0.7.0",
+  "description": "Third-party integration assistant for JianDaoYun: generates the field-id mapping, writable payload shapes and runnable curl/Python samples for a form, and drives cross-app or file-to-form data migration with backup, dry-run and read-back verification.",
+  "author": {
+    "name": "aicliagent",
+    "email": "hi@aicliagent.com"
+  },
+  "homepage": "https://aicliagent.com",
+  "license": "Apache-2.0",
+  "keywords": [
+    "jiandaoyun",
+    "low-code",
+    "api",
+    "integration",
+    "data-migration"
+  ],
+  "agents": ["./agents/jdy-integration-engineer.md"],
+  "skills": [
+    "./skills/hello-jdy",
+    "./skills/jdy-doc",
+    "./skills/jdy-devkit",
+    "./skills/jdy-sync"
+  ],
+
+  "expertType": "agent",
+  "agentName": "jdy-integration-engineer",
+
+  "displayName": {
+    "en": "JDY Integration Dev Assistant (3rd-party)",
+    "zh": "简道云集成开发助手（第三方）"
+  },
+  "profession": {
+    "en": "JianDaoYun API Integration & Data Migration Engineer",
+    "zh": "简道云 API 集成与数据迁移工程师"
+  },
+  "displayDescription": {
+    "en": "For developers wiring code into JianDaoYun: field-id mappings, writable payload shapes, runnable request samples, and cross-app or file-sourced data migration.",
+    "zh": "面向要写代码对接简道云的人：字段标识对照、请求样例、跨应用与外部文件的数据同步与迁移。"
+  },
+  "avatar": "avatars/expert.png",
+  "categoryId": "02-Engineering",
+  "defaultInitPrompt": {
+    "zh": "给我一张表单的字段标识对照和请求样例",
+    "en": "Generate the field-id table and request samples for one of my forms"
+  },
+  "plugin": "jdy-dev-expert",
+  "tags": [
+    { "en": "API Integration", "zh": "API 集成" },
+    { "en": "Field Schema", "zh": "字段标识对照" },
+    { "en": "Data Migration", "zh": "数据迁移" }
+  ],
+  "quickPrompts": [
+    { "en": "Generate the field-id table and request samples for one of my forms", "zh": "给我一张表单的字段标识对照和请求样例" },
+    { "en": "Sync the rows in a CSV file into a JianDaoYun form", "zh": "把 CSV 里的数据同步进简道云" },
+    { "en": "Migrate the data from one app into another app", "zh": "把这个应用的数据搬到另一个应用" }
+  ]
+}

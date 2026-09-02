@@ -19,6 +19,12 @@ description: |
   子表单同步、子表单搬不过去、带附件的表怎么同步、附件一起搬过去、明细行同步。
 version: 0.7.0
 license: Apache-2.0
+display_name: "简道云跨应用同步（Beta）"
+display_name_en: "JDY Cross-App Sync (Beta)"
+description_zh: "按业务键比对、按引用拓扑序同步、持久化 ID 映射保住表间关系，子表单与附件也能搬。默认 dry-run。"
+description_en: "Syncs records across JianDaoYun apps by business key in reference topological order, keeping cross-form relations through a persistent ID map; subforms and attachments included. Dry-run by default."
+category: data
+author: aicliagent
 ---
 
 # jdy-sync 数据同步（Beta）

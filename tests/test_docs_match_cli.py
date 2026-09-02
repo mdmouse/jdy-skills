@@ -20,7 +20,10 @@ FLAG = re.compile(r"(?<![\w-])(--[a-z][a-z0-9-]*)")
 
 def _docs():
     yield os.path.join(ROOT, "README.md")
-    for base in ("skills", "references", "docs"):
+    # experts/ 也扫：专家包的系统提示词里写的命令，Agent 会照着敲。
+    # 那里的参数写错，用户看到的是一句 "unrecognized arguments"，
+    # 而这个专家是要上架给别人装的——错的命令行会跟着发出去。
+    for base in ("skills", "references", "docs", "experts"):
         for root, _d, files in os.walk(os.path.join(ROOT, base)):
             if "%s_shared" % os.sep in root:
                 continue

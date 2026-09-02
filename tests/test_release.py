@@ -19,9 +19,12 @@ import zipfile
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
-def build_into(tmp):
-    r = subprocess.run([sys.executable, os.path.join(ROOT, "build.py"), "--dist", tmp],
-                       cwd=ROOT, capture_output=True, encoding="utf-8", errors="replace")
+def build_into(tmp, layout=None):
+    cmd = [sys.executable, os.path.join(ROOT, "build.py"), "--dist", tmp]
+    if layout:
+        cmd += ["--layout", layout]
+    r = subprocess.run(cmd, cwd=ROOT, capture_output=True,
+                       encoding="utf-8", errors="replace")
     return r
 
 
@@ -151,6 +154,92 @@ class Dist(unittest.TestCase):
                         problems.append("%s!%s → %s" % (name, member, hit))
         self.assertEqual([], problems, "发布包里有未脱敏内容：\n  "
                          + "\n  ".join(problems))
+
+
+class TwoLayouts(unittest.TestCase):
+    """**两个渠道要的 zip 顶层目录不一样，打错只有上传时才知道。**
+
+    GitHub Release / 千问办公要 `<name>/SKILL.md`；腾讯 WorkBuddy 开放平台的
+    「技能」渠道要 `skills/<name>/SKILL.md`——最外层多一级 `skills/`。
+    少了那一级，上传时对方报"找不到 SKILL.md"，而 zip 在本地解开来看毫无异样。
+    所以这里对两种布局各断言一次包内路径，并盯着校验和把两种都收进去。
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        cls._tmp = tempfile.TemporaryDirectory()
+        cls.out = cls._tmp.name
+        cls.result = build_into(cls.out, "both")
+
+    @classmethod
+    def tearDownClass(cls):
+        cls._tmp.cleanup()
+
+    def test_build_succeeds(self):
+        self.assertEqual(0, self.result.returncode,
+                         self.result.stdout + self.result.stderr)
+
+    def test_both_layouts_produce_a_zip_per_skill(self):
+        got = sorted(f[:-4] for f in os.listdir(self.out) if f.endswith(".zip"))
+        want = sorted([n for n in skill_names()]
+                      + ["%s-workbuddy" % n for n in skill_names()])
+        self.assertEqual(want, got)
+
+    def test_github_layout_top_level_dir_is_the_skill_name(self):
+        for name in skill_names():
+            with zipfile.ZipFile(os.path.join(self.out, "%s.zip" % name)) as zf:
+                names = zf.namelist()
+            self.assertEqual({name}, {n.split("/")[0] for n in names},
+                             "%s.zip 的顶层目录不对" % name)
+            self.assertIn("%s/SKILL.md" % name, names)
+
+    def test_workbuddy_layout_nests_everything_under_skills(self):
+        for name in skill_names():
+            zp = os.path.join(self.out, "%s-workbuddy.zip" % name)
+            with zipfile.ZipFile(zp) as zf:
+                names = zf.namelist()
+            self.assertEqual({"skills"}, {n.split("/")[0] for n in names},
+                             "%s-workbuddy.zip 的顶层目录必须是 skills/" % name)
+            self.assertEqual({name}, {n.split("/")[1] for n in names},
+                             "%s-workbuddy.zip 的第二层必须是技能名" % name)
+            self.assertIn("skills/%s/SKILL.md" % name, names,
+                          "官方要求的路径正是 skills/{skill-name}/SKILL.md")
+
+    def test_the_two_layouts_carry_exactly_the_same_files(self):
+        """换的只是顶层目录名，内容一个文件都不许多不许少。"""
+        for name in skill_names():
+            with zipfile.ZipFile(os.path.join(self.out, "%s.zip" % name)) as zf:
+                a = sorted(n.split("/", 1)[1] for n in zf.namelist())
+            with zipfile.ZipFile(os.path.join(
+                    self.out, "%s-workbuddy.zip" % name)) as zf:
+                b = sorted(n.split("/", 2)[2] for n in zf.namelist())
+            self.assertEqual(a, b, "%s 两种布局的内容不一致" % name)
+
+    def test_checksums_cover_both_layouts(self):
+        """只给一种布局写校验和，另一种就成了没人核得了的产物。"""
+        with open(os.path.join(self.out, "SHA256SUMS"), encoding="utf-8") as fh:
+            lines = [l for l in fh.read().splitlines() if l.strip()]
+        self.assertEqual(2 * len(skill_names()), len(lines))
+        listed = set()
+        for line in lines:
+            m = re.match(r"\A([0-9a-f]{64})  (\S+\.zip)\Z", line)
+            self.assertIsNotNone(m, "不是标准两列格式：%r" % line)
+            digest, fname = m.groups()
+            listed.add(fname)
+            with open(os.path.join(self.out, fname), "rb") as fh:
+                self.assertEqual(digest, hashlib.sha256(fh.read()).hexdigest(),
+                                 "%s 的校验和对不上" % fname)
+        for name in skill_names():
+            self.assertIn("%s.zip" % name, listed)
+            self.assertIn("%s-workbuddy.zip" % name, listed)
+
+    def test_manifest_covers_both_layouts_with_the_declared_version(self):
+        with open(os.path.join(self.out, "MANIFEST.txt"), encoding="utf-8") as fh:
+            rows = dict(re.findall(r"^(\S+)\s+v(\S+)", fh.read(), re.M))
+        for name in skill_names():
+            for stem in (name, "%s-workbuddy" % name):
+                self.assertIn(stem, rows, "MANIFEST 里少了 %s" % stem)
+                self.assertEqual(declared_version(name), rows[stem])
 
 
 if __name__ == "__main__":

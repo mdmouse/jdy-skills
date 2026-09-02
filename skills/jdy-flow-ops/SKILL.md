@@ -17,6 +17,12 @@ description: |
   催办、催一下、提醒审批、谁卡着没处理。
 version: 0.7.0
 license: Apache-2.0
+display_name: "简道云审批流程运营"
+display_name_en: "JDY Approval Workflow Ops"
+description_zh: "待办收件箱、流程积压扫描、批量同意／否决／回退／转交、按人催办。写操作默认 dry-run。"
+description_en: "Approval to-do inbox, backlog and bottleneck scanning, bulk approve/reject/rollback/transfer, and per-person nudges. Write actions are dry-run by default."
+category: office
+author: aicliagent
 ---
 
 # jdy-flow-ops 流程运营

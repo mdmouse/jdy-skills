@@ -18,6 +18,7 @@ import contextlib
 import importlib.util
 import io
 import os
+import re
 import sys
 import tempfile
 import unittest
@@ -450,21 +451,46 @@ class TestInstallerTail(unittest.TestCase):
 
 
 class TestSkillMdIsUntouched(unittest.TestCase):
-    """**SKILL.md 里不许出现品牌。**
+    """**SKILL.md 里不许出现品牌——只有 `author:` 那一行例外。**
 
     frontmatter 的 description 是 Agent 的触发依据和商店卡片文案；正文是给
     Agent 读的操作指令。往里塞品牌等于让 Agent 替我念广告，还会污染触发。
+
+    唯一的例外是 frontmatter 的 `author:`：WorkBuddy 开放平台「技能」渠道
+    把它列为必填，审核方按它认合作方，填别的名字等于把作者写错。
+    它是**结构化元数据**，不进 description、不进正文，Agent 不会照着念。
+    所以这条测试从"整个文件不许出现"收窄成"**除 author 那一行外**不许出现"，
+    并额外钉住两件事：author 的值必须**正好**是品牌名（不是"含有"），
+    以及品牌名在整个文件里只出现这一次——多出一处就红。
     """
 
-    def test_no_skill_md_mentions_the_brand(self):
+    AUTHOR_LINE = re.compile(r"^author:\s*(\S.*?)\s*$", re.M)
+
+    def test_no_skill_md_mentions_the_brand_outside_the_author_field(self):
         bad = []
         for skill in sorted(os.listdir(os.path.join(ROOT, "skills"))):
             md = os.path.join(ROOT, "skills", skill, "SKILL.md")
             if not os.path.isfile(md):
                 continue
-            if brand.NAME in _read(md):
+            rest = self.AUTHOR_LINE.sub("", _read(md))
+            if brand.NAME in rest:
                 bad.append(skill)
-        self.assertEqual(bad, [], "这些 SKILL.md 里出现了品牌：%s" % bad)
+        self.assertEqual(bad, [], "这些 SKILL.md 在 author 之外出现了品牌：%s" % bad)
+
+    def test_author_field_is_exactly_the_brand_and_appears_once(self):
+        """例外只开这么大：一处、一行、值正好是品牌名。"""
+        for skill in sorted(os.listdir(os.path.join(ROOT, "skills"))):
+            md = os.path.join(ROOT, "skills", skill, "SKILL.md")
+            if not os.path.isfile(md):
+                continue
+            text = _read(md)
+            authors = self.AUTHOR_LINE.findall(text)
+            self.assertEqual(authors, [brand.NAME],
+                             "%s 的 author 行应恰好一条且值为 %r，实际 %r"
+                             % (skill, brand.NAME, authors))
+            self.assertEqual(text.count(brand.NAME), 1,
+                             "%s 里品牌出现了 %d 次，只许 author 那一次"
+                             % (skill, text.count(brand.NAME)))
 
 
 class TestDocsPromiseTheSwitch(unittest.TestCase):

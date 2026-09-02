@@ -12,6 +12,12 @@ description: |
   字段 ID 是什么、简道云开发。
 version: 0.7.0
 license: Apache-2.0
+display_name: "简道云集成开发加速器"
+display_name_en: "JDY Integration Devkit"
+description_zh: "给一张表单生成字段标识对照、可写形状、可直接跑的 curl／Python 样例与入参校验函数。"
+description_en: "For a given form, generates the label-to-field-id table, the writable payload shape per widget, runnable curl/Python samples with zero third-party dependencies, and an input validator."
+category: development
+author: aicliagent
 ---
 
 # jdy-devkit 集成开发加速器

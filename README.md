@@ -182,6 +182,48 @@ python3 build.py --dist dist  # 发布：打 zip + 写 SHA256SUMS
 版本变更见 [CHANGELOG.md](CHANGELOG.md)。上架材料与商标约束见
 [docs/store-listing.md](docs/store-listing.md)。
 
+## WorkBuddy 开放平台：技能与专家
+
+腾讯 WorkBuddy 开放平台（open.workbuddy.cn）有两个渠道，要的是**两种不同形状的
+压缩包**。两种都能从这个仓库构建出来，构建命令不同、产物也不同。
+
+| 渠道 | 产物 | zip 内的第一层 | 怎么构建 |
+|---|---|---|---|
+| **技能** | `<name>-workbuddy.zip` × 11 | `skills/<name>/SKILL.md` | `python3 build.py --dist dist --layout workbuddy` |
+| **专家** | `jdy-ops-expert.zip`、`jdy-dev-expert.zip` | `.codebuddy-plugin/plugin.json` | `python3 build_experts.py` |
+
+GitHub Release 与千问办公用的还是原来那种 `<name>.zip`（第一层是 `<name>/`），
+`python3 build.py --dist dist` 不变；`--layout both` 两种一起打，
+SHA256SUMS 与 MANIFEST.txt 会把两种布局都收进去。
+
+**顶层目录差一级，本地一点都看不出来。** 技能渠道要最外面多一级 `skills/`，
+少了它上传时报"找不到 SKILL.md"；专家包反过来，zip 的根**就是**包内容，
+外面多套一层目录，平台报「压缩包缺少 .codebuddy-plugin/plugin.json 文件」。
+两种错都只在上传那一刻出现，所以 `tests/test_release.py` 和 `tests/test_experts.py`
+各自盯着包内路径。
+
+### 两个专家包
+
+专家 = CodeBuddy 插件格式（`.codebuddy-plugin/plugin.json` + `agents/` +
+`avatars/` + `skills/`）。源文件在 [`experts/`](experts/) 下，
+**技能目录不入库**——构建时按 plugin.json 的 `skills` 声明从 `skills/` 拷进去，
+免得仓库里存两份同名技能慢慢分叉。
+
+| 专家 | 给谁 | 装了哪些技能 |
+|---|---|---|
+| [`jdy-ops-expert`](experts/jdy-ops-expert/) 简道云运营助手 | 天天在简道云里做表、导数、催审批的运营／行政／业务负责人 | `hello-jdy`、`jdy-doc`、`jdy-query`、`jdy-excel-bridge`、`jdy-report`、`jdy-flow-ops`、`jdy-clean`、`jdy-watch`、`jdy-org` |
+| [`jdy-dev-expert`](experts/jdy-dev-expert/) 简道云集成开发助手 | 要写代码对接简道云、或做数据迁移的人 | `hello-jdy`、`jdy-doc`、`jdy-devkit`、`jdy-sync` |
+
+两个专家的系统提示词里都写死了同一套规矩：**非官方第三方身份**、
+**读可以走官方「AI 连接」连接器、任何写入只走技能脚本**、
+写入先 dry-run 念计划、用户点头才 `--execute`、从不删除记录、
+没配 Key 就引导跑 `hello-jdy` 的配置向导而不是让用户把 Key 贴进对话。
+
+```bash
+python3 build_experts.py --check   # 只校验 experts/，不产出文件
+python3 build_experts.py           # 校验 + 构建到 dist/experts/
+```
+
 ## 作者
 
 本项目由 [aicliagent](https://aicliagent.com) 制作与维护。用得顺手、或者踩到坑，

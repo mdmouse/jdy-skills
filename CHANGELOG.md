@@ -13,6 +13,33 @@
 
 ### 新增
 
+- **上腾讯 WorkBuddy 开放平台的两个渠道。**
+  - **技能渠道**：11 个 `SKILL.md` 的 frontmatter 补齐上架必填字段
+    `display_name` / `display_name_en` / `description_zh` / `description_en` /
+    `category` / `author`。**`description` 一个字没动**——它是三端的触发依据，
+    不是商店卡片文案，两者是两件东西。`tests/test_skill_format.py` 逐个校验
+    六个字段存在非空、`description_zh` ≤ 60 字、`author` 恰好是 `aicliagent`。
+  - **两种 zip 布局**：`build.py --dist DIR` 仍产出 `<name>.zip`（根是 `<name>/`，
+    GitHub Release 与千问办公用）；新增 `--layout workbuddy` 产出
+    `<name>-workbuddy.zip`（根是 `skills/<name>/`，WorkBuddy 技能渠道要的形状），
+    `--layout both` 两种一起打，SHA256SUMS 与 MANIFEST.txt 把两种都收进去。
+    **顶层目录差一级只在上传那一刻报错**，本地解压看着一模一样，
+    所以 `tests/test_release.py` 对两种布局各断言一次包内路径。
+  - **专家渠道**：新增 `experts/jdy-ops-expert`（运营／行政，`09-OperationsHR`，
+    装 9 个技能）与 `experts/jdy-dev-expert`（集成开发，`02-Engineering`，
+    装 4 个技能），CodeBuddy 插件格式。两个 Agent 的系统提示词里写死了
+    非官方第三方身份与商标边界、**读可走官方「AI 连接」连接器／任何写入只走
+    技能脚本**（明令禁止拿官方单条新增工具循环当批量导入——它静默存 null
+    还返回成功）、写入先 dry-run 念计划、用户点头才 `--execute`、从不删除记录、
+    没配 Key 引导跑 `hello-jdy` 的配置向导而不是让用户把 Key 贴进对话。
+  - `build_experts.py`：校验 + 从 `skills/` 拷技能 + 打 zip + 写 SHA256SUMS。
+    **技能目录不入库**（仓库里存两份一定会分叉），**zip 的根就是包根不套目录**
+    （套了平台报「压缩包缺少 .codebuddy-plugin/plugin.json 文件」）。
+    `tests/test_experts.py` 逐条断言官方规范，并做变异检查：中文展示描述改成
+    39 字、tags 删成 2 个、`defaultInitPrompt` 与 `quickPrompts[0]` 不一致、
+    frontmatter 里加 `tools`，四种改法各自必须红。
+  - **暂不声明 `dependencies.connectors`**：简道云官方连接器的 ID 还不知道，
+    猜错会让安装直接失败，比不声明更糟。两个专家的 README 里各留一行 TODO。
 - **品牌署名。** 生成的文件（HTML 报告、周报 Markdown、数据字典、集成样例、
   修复建议表）末尾带一行 `aicliagent` 静态署名，`JDY_BRAND=0` 关闭；
   唯一来源 `_shared/brand.py`，`tests/test_brand.py` 守着每个落点。

@@ -25,6 +25,11 @@ sys.path.insert(0, os.path.join(ROOT, "_shared"))
 from miniyaml import parse as parse_yaml  # noqa: E402
 FM = re.compile(r"\A---\n(.*?)\n---\n", re.S)
 
+# WorkBuddy 官方没有给出完整的 category 枚举，这是我们先用的一组；
+# docs/store-listing.md 里写明「以审核反馈为准」。
+CATEGORIES = {"data", "office", "automation", "development", "writing"}
+BRAND = "aicliagent"
+
 failures = []
 
 
@@ -64,6 +69,8 @@ def check_skill(path, name):
     elif not re.match(r"\A\d+\.\d+\.\d+\Z", str(version)):
         fail(name, "version=%r 不是 x.y.z" % version)
 
+    check_workbuddy_fields(name, meta)
+
     # 密钥零容忍：技能目录里不许出现疑似真密钥
     for dirpath, _, files in os.walk(path):
         for f in files:
@@ -76,6 +83,34 @@ def check_skill(path, name):
             for pat in (r"Bearer\s+[A-Za-z0-9]{24,}", r"api_key\"\s*:\s*\"[A-Za-z0-9]{16,}\""):
                 if re.search(pat, body):
                     fail(name, "疑似硬编码密钥：%s" % os.path.relpath(fp, ROOT))
+
+
+def check_workbuddy_fields(name, meta):
+    """WorkBuddy 开放平台「技能」渠道要求的上架字段。
+
+    渠道要的是 display_name / display_name_en / description_zh / description_en /
+    category / author，而 `description` 那一段是给模型看的触发依据（几百字、
+    带触发词），塞进商店卡片就是噪音。**两者是两件东西，缺一个就上不了架**，
+    而缺了在本地跑技能完全看不出来——所以这里逐个盯着。
+
+    `author` 必须是本项目的品牌名：审核方按它认合作方，写别的等于换了个作者。
+    """
+    for key in ("display_name", "display_name_en",
+                "description_zh", "description_en", "category"):
+        value = meta.get(key)
+        if value is None or not str(value).strip():
+            fail(name, "缺少 %s —— WorkBuddy 技能渠道的上架必填字段" % key)
+
+    zh = str(meta.get("description_zh") or "")
+    if len(zh) > 60:
+        fail(name, "description_zh 有 %d 字，超过 60 字上限（商店卡片放不下）" % len(zh))
+
+    author = meta.get("author")
+    if author != BRAND:
+        fail(name, "author=%r，应为 %r —— 审核方按它认合作方" % (author, BRAND))
+
+    if meta.get("category") not in CATEGORIES:
+        fail(name, "category=%r 不在 %s 之内" % (meta.get("category"), sorted(CATEGORIES)))
 
 
 def check_vendored_kernel_is_current():

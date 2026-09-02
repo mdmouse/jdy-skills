@@ -15,6 +15,12 @@ description: |
   这个字段都有哪些值、出个临时报表、生成 HTML 报告。
 version: 0.7.0
 license: Apache-2.0
+display_name: "简道云查数与图表报告"
+display_name_en: "JDY Query & Chart Report"
+description_zh: "按条件筛选、分组聚合简道云数据，产出自包含的 HTML 图表报告。只读。"
+description_en: "Filters, groups and aggregates JianDaoYun form data, then renders a self-contained HTML chart report. Read-only."
+category: data
+author: aicliagent
 ---
 
 # jdy-query 临时查数与即席报告
